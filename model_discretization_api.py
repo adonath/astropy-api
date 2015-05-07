@@ -50,7 +50,7 @@ convolved_model = ConvolvedModel(source, psf, convolution=scipy.signal.fftconvol
 convolved_model = ConvolvedModel(source, psf, convolution='standard', boundary='none')
 
 # Further notes:
-# 1. Implementation of this class shpould be straight forward and not much effort
+# 1. Implementation of this class should be straight forward and not much effort
 # 2. Testing could be set up using Gaussian models, where the analytical solution is
 # known
 # 3. Later one could think about assigning the corresponding fourier transforms to analytical
@@ -76,22 +76,27 @@ import numpy as np
 model = Gaussian1D(1, 0, 1)
 model.integrate(0, np.inf)
 
-# it should also work with an arrays of bounds of course
+# it should also work with arrays of bounds of course
 x_lo = np.arange(-10, 11) - 0.5
-x_high = np.arange(-10, 11) + 0.5
+x_hi = np.arange(-10, 11) + 0.5
 model.integrate(x_lo, x_hi)
+
+# for 2d models it would be
+y_lo = np.arange(-10, 11) - 0.5
+y_hi = np.arange(-10, 11) + 0.5
+model.integrate(x_lo, x_hi, y_lo, y_hi)
 
 # whenever possible (e.g. polynomials) the integrate function would be implemented
 # analytically, for all others a standard numerical integration routine would be used
-# e.g. scipy.
+# e.g. from scipy.integrate
 
-# for convenience one could incorporate the functionality in the standard model API
+# for convenience one could incorporate the functionality into the standard model API
 model = Gaussian1D(1, 0, 1, eval_method='integrate')
 model = Gaussian1D(1, 0, 1, eval_method='oversample')
 model = Gaussian1D(1, 0, 1, eval_method='center')
 
 # where the given evaluation method would be used when the model is called
-# for evaluation
+# for evaluation. This would only work for models defined in pixel coordinates
 x = np.arange(-10, 11)
 model(x)
 
@@ -139,8 +144,9 @@ cutout = sky_image.extract(position, source.extent)
 cutout = sky_image.extract(position, source.extent, copy=True)
 
 # which returns again a SkyImage object, but with modified WCS transform 
+# data can be copied optionally
 
-# to render model on the sky a new function should be defined
+# to render the model on a sky image a new function should be defined
 source_image = render_model_to_sky(source, wcs=WCS())
 
 # which would return again a (smaller) SkyImage object centered on the
@@ -152,3 +158,4 @@ sky_image.add(source_image)
 # later `.add` could use any kind of resampling/reprojection
 # for now we just assume that `sky_image` and `source_image`
 # pixels are aligned (which should be checked...)
+
